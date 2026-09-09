@@ -1,0 +1,20 @@
+services:
+  rcron:
+    build:
+      context: .
+      args:
+        CRONTAB_UI_REF: ${CRONTAB_UI_REF:-master}
+    image: rcron:local
+    ports:
+      - "8000:8000"
+    environment:
+      TZ: ${TZ:-UTC}
+      BASIC_AUTH_USER: ${BASIC_AUTH_USER:-}
+      BASIC_AUTH_PWD: ${BASIC_AUTH_PWD:-}
+    volumes:
+      - rclone-config:/config
+      - rcron-data:/rcron-data
+    restart: unless-stopped
+volumes:
+  rclone-config:
+  rcron-data:
