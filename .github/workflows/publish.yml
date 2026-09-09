@@ -1,0 +1,35 @@
+name: Build and publish image
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Load pinned crontab-ui revision
+        run: |
+          source upstream.lock
+          echo "CRONTAB_UI_REF=$CRONTAB_UI_REF" >> "$GITHUB_ENV"
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          pull: true
+          build-args: |
+            CRONTAB_UI_REF=${{ env.CRONTAB_UI_REF }}
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/rcron:latest
+            ghcr.io/${{ github.repository_owner }}/rcron:${{ github.sha }}

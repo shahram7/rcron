@@ -1,0 +1,35 @@
+name: Update upstream revisions
+
+on:
+  schedule:
+    - cron: "17 */6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Read current upstream commits
+        id: upstream
+        shell: bash
+        run: |
+          echo "rclone=$(git ls-remote https://github.com/rclone/rclone.git HEAD | cut -f1)" >> "$GITHUB_OUTPUT"
+          echo "crontab_ui=$(git ls-remote https://github.com/alseambusher/crontab-ui.git HEAD | cut -f1)" >> "$GITHUB_OUTPUT"
+      - name: Update lock file
+        shell: bash
+        run: |
+          sed -i "s/^RCLONE_REF=.*/RCLONE_REF=${{ steps.upstream.outputs.rclone }}/" upstream.lock
+          sed -i "s/^CRONTAB_UI_REF=.*/CRONTAB_UI_REF=${{ steps.upstream.outputs.crontab_ui }}/" upstream.lock
+      - name: Commit changed revisions
+        shell: bash
+        run: |
+          if git diff --quiet -- upstream.lock; then exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add upstream.lock
+          git commit -m "chore: update upstream revisions"
+          git push
