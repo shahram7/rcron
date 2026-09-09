@@ -11,9 +11,10 @@ RUN apk add --no-cache git \
     && npm cache clean --force
 
 FROM ${RCLONE_IMAGE}
-RUN apk add --no-cache curl nodejs supervisor tini tzdata \
+RUN apk add --no-cache curl nodejs supervisor tini tzdata bash \
     && mkdir -p /etc/crontabs /var/log/rcron /rcron-data \
-    && touch /etc/crontabs/root
+    && touch /etc/crontabs/root   
+RUN echo 'alias ll="ls -la"' >> /root/.bashrc    
 COPY --from=crontab-ui /crontab-ui /crontab-ui
 COPY docker/supervisord.conf /etc/supervisord.conf
 ENV HOST=0.0.0.0 PORT=8000 CRON_IN_DOCKER=true CRON_PATH=/etc/crontabs CRON_DB_PATH=/rcron-data
