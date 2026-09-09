@@ -20,6 +20,7 @@ COPY docker/supervisord.conf /etc/supervisord.conf
 ENV HOST=0.0.0.0 PORT=8000 CRON_IN_DOCKER=true CRON_PATH=/etc/crontabs CRON_DB_PATH=/rcron-data
 EXPOSE 8000
 VOLUME ["/config", "/rcron-data"]
-HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 CMD curl --fail http://localhost:${PORT}/ || exit 1
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
+    CMD curl -fsS http://127.0.0.1:8000/ || exit 1
 ENTRYPOINT ["/sbin/tini", "--"]
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
