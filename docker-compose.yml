@@ -1,10 +1,6 @@
 services:
   rcron:
-    build:
-      context: .
-      args:
-        CRONTAB_UI_REF: ${CRONTAB_UI_REF:-master}
-    image: rcron:local
+    image: ${RCRON_IMAGE:-ghcr.io/shahram7/rcron:latest}
     ports:
       - "8000:8000"
     environment:
@@ -15,6 +11,7 @@ services:
       - rclone-config:/config
       - rcron-data:/rcron-data
     restart: unless-stopped
+
 volumes:
   rclone-config:
   rcron-data:
